@@ -92,8 +92,8 @@ function StateStore.addHistoryRecord(eggName)
     end
 
     table.insert(StateStore.farmHistory, 1, {
-        name   = eggName,
-        time   = os.date("%H:%M:%S"),
+        name  = eggName,
+        time  = os.date("%H:%M:%S"),
         isRare = isRare,
     })
 
