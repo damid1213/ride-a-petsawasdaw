@@ -7,7 +7,7 @@
       • Returns bool indicating which path was taken
 ]]
 
-local NS = getgenv().Vanguard or getgenv().EggsESP
+local NS = getgenv().EggsESP
 local S  = NS.Services
 
 local Interaction = {}
