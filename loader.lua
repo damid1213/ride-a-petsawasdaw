@@ -17,7 +17,7 @@
 
 -- ── Configuration ────────────────────────────────────────────────────
 local CONFIG = {
-    BASE_URL    = "https://raw.githubusercontent.com/damid1213/ride-a-petsawasdaw/main/src/",
+    BASE_URL    = "https://raw.githubusercontent.com/damid1213/ride-a-petsawasdaw/refs/heads/main/src/",
     VERSION_URL = "https://raw.githubusercontent.com/damid1213/ride-a-petsawasdaw/main/version.txt",
     CACHE_DIR   = "Vanguard",
     NAMESPACE   = "EggsESP",
@@ -45,7 +45,7 @@ local CONFIG = {
     GAME_ROUTES = {
         {
             name     = "Pull An Egg",
-            url      = "https://raw.githubusercontent.com//damid1213/ride-a-petsawasdaw/main/scripts/pull_an_egg.lua",
+            url      = "https://raw.githubusercontent.com/damid1213/ride-a-petsawasdaw/refs/heads/main/scripts/pull_an_egg.lua",
             placeIds = { 70640255604878 },
             gameIds  = { 10649255304 },
         },
