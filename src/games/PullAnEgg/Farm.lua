@@ -174,7 +174,7 @@ function Farm.teleportToTier(tierName)
 end
 
 function Farm.teleportToSpawn()
-    local map   = workspace:FindFirstChild("Map")
+    local map  = workspace:FindFirstChild("Map")
     local spawn = map and map:FindFirstChild("SpawnLocation")
     if spawn and spawn:IsA("BasePart") then
         Farm.teleportTo(spawn.CFrame)
