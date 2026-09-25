@@ -2,12 +2,12 @@
     Vanguard — ESP.lua
     3D Billboards + Highlights for rendered eggs.
     Rewritten:
-        • bindEggLifecycle no longer leaks connections into _connections forever
-        • updateBillboard skips distance calc when egg is beyond MaxDistance
-        • setEnabled() added (used by PullAnEgg UI)
+      • bindEggLifecycle no longer leaks connections into _connections forever
+      • updateBillboard skips distance calc when egg is beyond MaxDistance
+      • setEnabled() added (used by PullAnEgg UI)
 ]]
 
-local NS         = getgenv().Vanguard or getgenv().EggsESP
+local NS         = getgenv().EggsESP
 local AppConfig  = NS.Config
 local S          = NS.Services
 local StateStore = NS.StateStore
@@ -49,10 +49,10 @@ function ESP.createBillboard(egg)
 
     -- ── Backdrop card ────────────────────────────────────────────────
     local card = Instance.new("Frame")
-    card.Name                   = "Card"
-    card.Size                   = UDim2.new(1, 0, 1, 0)
+    card.Name                    = "Card"
+    card.Size                    = UDim2.new(1, 0, 1, 0)
     card.BackgroundColor3        = Color3.fromRGB(8, 8, 12)
-    card.BackgroundTransparency = 0.22
+    card.BackgroundTransparency  = 0.22
     card.BorderSizePixel         = 0
     card.Parent                  = billboard
 
@@ -82,10 +82,10 @@ function ESP.createBillboard(egg)
 
     -- ── Icon (egg emoji) ──────────────────────────────────────────────
     local icon = Instance.new("TextLabel")
-    icon.Name                   = "Icon"
+    icon.Name                    = "Icon"
     icon.Position                = UDim2.new(0, 7, 0, 0)
     icon.Size                    = UDim2.new(0, 22, 1, 0)
-    icon.BackgroundTransparency = 1
+    icon.BackgroundTransparency  = 1
     icon.Text                    = "🥚"
     icon.TextSize                = 14
     icon.Font                    = Enum.Font.GothamBold
@@ -98,7 +98,7 @@ function ESP.createBillboard(egg)
     nameLabel.Size                   = UDim2.new(1, -36, 0, 22)
     nameLabel.BackgroundTransparency = 1
     nameLabel.Text                   = egg.Name
-    nameLabel.TextColor3              = eggColor
+    nameLabel.TextColor3             = eggColor
     nameLabel.TextStrokeTransparency = 0.3
     nameLabel.TextStrokeColor3       = Color3.fromRGB(0, 0, 0)
     nameLabel.TextSize               = AppConfig.ESPNameSize or 13
@@ -114,7 +114,7 @@ function ESP.createBillboard(egg)
     distLabel.Size                   = UDim2.new(1, -36, 0, 16)
     distLabel.BackgroundTransparency = 1
     distLabel.Text                   = "0 studs"
-    distLabel.TextColor3              = Color3.fromRGB(185, 190, 210)
+    distLabel.TextColor3             = Color3.fromRGB(185, 190, 210)
     distLabel.TextStrokeTransparency = 0.5
     distLabel.TextStrokeColor3       = Color3.fromRGB(0, 0, 0)
     distLabel.TextSize               = AppConfig.ESPDistanceSize or 11
