@@ -1,5 +1,5 @@
 --[[
-    LuxuryXHUB — Stability.lua
+    Vanguard — Stability.lua
     Anti-AFK + auto-rejoin resilience.
     Rewritten: added warn() when both rejoin paths fail, cleaner separation.
 ]]
