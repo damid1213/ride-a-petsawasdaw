@@ -17,7 +17,7 @@
 
 -- ── Configuration ────────────────────────────────────────────────────
 local CONFIG = {
-    BASE_URL    = "https://raw.githubusercontent.com/LostInSyntaxx/RideAPet/main/src/",
+    BASE_URL    = "https://raw.githubusercontent.com/damid1213/ride-a-petsawasdaw/refs/heads/main/src/",
     VERSION_URL = "https://raw.githubusercontent.com/LostInSyntaxx/RideAPet/main/version.txt",
     CACHE_DIR   = "Vanguard",
     NAMESPACE   = "EggsESP",
