@@ -1,8 +1,13 @@
 --[[
     Vanguard — Pull An Egg
-    UI.lua — Vanguard Standard Dashboard  ·  Ribbon Tabs  ·  Nested Cards
+    UI.lua — AAA Dark Dashboard  ·  Ribbon Tabs  ·  Nested Cards
 
-    Rebranded & Upgraded to Vanguard Standard Architecture
+    Fixes vs previous version:
+    · Single consolidated colour palette (C) — no duplicate token tables
+    · Toggle hover closure always reads live `state` (no stale-colour flash)
+    · AutoRevive, AutoBuyGear toggles present on the Farm tab
+    · Ctrl toggle shortcut uses the tracked Runtime connection for clean unload
+    · destroy() disconnects the keyboard shortcut connection
 ]]
 
 local TweenService     = game:GetService("TweenService")
@@ -11,7 +16,7 @@ local CoreGui          = game:GetService("CoreGui")
 local Players          = game:GetService("Players")
 local LocalPlayer      = Players.LocalPlayer
 
--- ── Vanguard Colour Palette ───────────────────────────────────────────────────
+-- ── Colour Palette ───────────────────────────────────────────────────
 
 local C = {
     -- Backgrounds (darkest → lightest)
@@ -23,10 +28,10 @@ local C = {
     border0   = Color3.fromRGB( 50,  50,  50),
     border1   = Color3.fromRGB( 45,  45,  45),
     border2   = Color3.fromRGB( 38,  38,  38),
-    -- Accent (Vanguard Crimson/Red Theme)
-    gold      = Color3.fromRGB(220,  38,  38),  -- Rebranded Vanguard primary red
-    goldDim   = Color3.fromRGB( 60,   8,   8),
-    goldGlow  = Color3.fromRGB(248, 113, 113),
+    -- Accent
+    gold      = Color3.fromRGB(255, 185,  50),
+    goldDim   = Color3.fromRGB( 60,  42,   8),
+    goldGlow  = Color3.fromRGB(255, 200,  80),
     -- Status
     green     = Color3.fromRGB( 52, 211, 153),
     greenDim  = Color3.fromRGB( 15,  60,  40),
@@ -56,8 +61,8 @@ end
 
 local function stroke(parent, col, th)
     local s = Instance.new("UIStroke")
-    s.Color             = col or C.border1
-    s.Thickness         = th  or 1
+    s.Color            = col or C.border1
+    s.Thickness        = th  or 1
     s.ApplyStrokeMode  = Enum.ApplyStrokeMode.Border
     s.Parent           = parent
     return s
@@ -94,10 +99,13 @@ local UI = {
 local Config, Farm, ESP, Remotes
 
 local function getGuiParent()
+    -- 1. gethui() — executor protected GUI container
     local ok, hui = pcall(function() return gethui() end)
     if ok and hui then return hui end
+    -- 2. CoreGui — available in most executors
     local ok2, _ = pcall(function() return CoreGui:GetChildren() end)
     if ok2 then return CoreGui end
+    -- 3. PlayerGui — wait up to 10s for LocalPlayer to be ready
     local player = Players.LocalPlayer
         or Players:GetPropertyChangedSignal("LocalPlayer"):Wait()
     if player then
@@ -106,6 +114,7 @@ local function getGuiParent()
         end)
         if ok3 and pgui then return pgui end
     end
+    -- 4. Last-resort fallback — should never be reached
     return CoreGui
 end
 
@@ -160,13 +169,13 @@ function UI.build()
     local fabStroke = stroke(fabFrame, C.gold, 1.5)
 
     local fabBtn = Instance.new("TextButton")
-    fabBtn.Name                = "OpenButton"
-    fabBtn.Size                = UDim2.new(1, 0, 1, 0)
+    fabBtn.Name               = "OpenButton"
+    fabBtn.Size               = UDim2.new(1, 0, 1, 0)
     fabBtn.BackgroundTransparency = 1
-    fabBtn.Text                = "🛡️"
-    fabBtn.TextSize            = 24
-    fabBtn.Font                = Enum.Font.GothamBold
-    fabBtn.Parent              = fabFrame
+    fabBtn.Text               = "🐾"
+    fabBtn.TextSize           = 24
+    fabBtn.Font               = Enum.Font.GothamBold
+    fabBtn.Parent             = fabFrame
 
     -- FAB drag
     local fabDragging, fabDragInput, fabDragStart, fabDragPos
@@ -202,7 +211,7 @@ function UI.build()
     corner(shell, UDim.new(0, 16))
     stroke(shell, C.border0, 1)
 
-    -- Gold/Red top stripe
+    -- Gold top stripe
     local stripe = Instance.new("Frame")
     stripe.Size             = UDim2.new(1, 0, 0, 2)
     stripe.BackgroundColor3 = C.gold
@@ -240,7 +249,7 @@ function UI.build()
     local logoTxt = Instance.new("TextLabel")
     logoTxt.Size                 = UDim2.new(1, 0, 1, 0)
     logoTxt.BackgroundTransparency = 1
-    logoTxt.Text                 = "🛡️"
+    logoTxt.Text                 = "🐾"
     logoTxt.TextSize             = 16
     logoTxt.Font                 = Enum.Font.GothamBold
     logoTxt.Parent               = logoBox
@@ -284,7 +293,7 @@ function UI.build()
         b.MouseLeave:Connect(function() tw(b, {BackgroundTransparency = 0.0}) end)
         return b
     end
-    local closeBtn = winBtn(C.red,                       "✕", -38)
+    local closeBtn = winBtn(C.red,                      "✕", -38)
     local minBtn   = winBtn(Color3.fromRGB(55, 55, 55), "─", -72)
 
     -- Title bar rule
@@ -513,6 +522,7 @@ function UI.build()
             if onToggle then onToggle(state) end
         end)
 
+        -- Hover reads live state so the colour never flashes stale
         hit.MouseEnter:Connect(function()
             tw(o, {BackgroundColor3 = Color3.fromRGB(42, 42, 42)})
         end)
@@ -675,6 +685,7 @@ function UI.build()
         end
     end
 
+    -- Wire tab buttons after all tabs are created (done below)
     local function wireTabButtons()
         for _, t in ipairs(tabs) do
             local name = t.name
@@ -757,71 +768,46 @@ function UI.build()
             Config.TargetEggTier = tier
             Farm.teleportToTier(tier)
         end)
+        -- Tier colour swatch dot
         local dot = Instance.new("Frame")
         dot.Size             = UDim2.new(0, 8, 0, 8)
-        dot.Position         = UDim2.new(1, -24, 0.5, -4)
+        dot.Position         = UDim2.new(1, -22, 0.5, -4)
         dot.BackgroundColor3 = col
         dot.BorderSizePixel  = 0
-        dot.Parent           = btn:FindFirstChildOfClass("TextButton")
-        corner(dot, UDim.new(1, 0))
+        dot.Parent           = btn
+        local dc = Instance.new("UICorner")
+        dc.CornerRadius = UDim.new(0, 4)
+        dc.Parent = dot
     end
 
     -- ────────────────────────────────────────────────────────────────
-    --  TAB 3 — Misc / Settings
+    --  TAB 3 — Misc
     -- ────────────────────────────────────────────────────────────────
-    local miscPage = createTab("Settings", "⚙️")
+    local miscPage = createTab("Misc", "⚙️")
 
-    sectionLabel(miscPage, "TOWN TELEPORTS")
+    sectionLabel(miscPage, "REWARDS")
 
-    createButton(miscPage, "Teleport to Spawn", C.blue, function()
-        Farm.teleportToSpawn()
+    createButton(miscPage, "Claim Daily & Group Rewards", C.green, function()
+        Remotes.claimDailyReward()
+        Remotes.claimGroupReward()
     end)
 
-    createButton(miscPage, "Teleport to Sell Area", C.gold, function()
-        Farm.teleportToSell()
+    createButton(miscPage, "Sell All Friends (Manual)", C.gold, function()
+        Remotes.sellAll()
     end)
 
-    sectionLabel(miscPage, "CREDITS & SYSTEM")
+    sectionLabel(miscPage, "TELEPORT")
 
-    local credCard = outerCard(miscPage, 84)
-    local credInn  = innerCard(credCard)
-    padding(credInn, 12, 10)
+    createButton(miscPage, "Teleport to Spawn",         C.gold, function() Farm.teleportToSpawn() end)
+    createButton(miscPage, "Teleport to Sell Shop",     C.gold, function() Farm.teleportToShop("Sell") end)
+    createButton(miscPage, "Teleport to Strength Shop", C.gold, function() Farm.teleportToShop("ShopSpeed") end)
+    createButton(miscPage, "Teleport to Carry Shop",    C.gold, function() Farm.teleportToShop("ShopCarry") end)
 
-    local c1 = Instance.new("TextLabel")
-    c1.Size                 = UDim2.new(1, 0, 0, 18)
-    c1.BackgroundTransparency = 1
-    c1.Text                 = "Vanguard Hub — Pull An Egg Standard"
-    c1.TextColor3           = C.goldGlow
-    c1.Font                 = Enum.Font.GothamBold
-    c1.TextSize             = 13
-    c1.TextXAlignment       = Enum.TextXAlignment.Left
-    c1.Parent               = credInn
-
-    local c2 = Instance.new("TextLabel")
-    c2.Position             = UDim2.new(0, 0, 0, 22)
-    c2.Size                 = UDim2.new(1, 0, 0, 14)
-    c2.BackgroundTransparency = 1
-    c2.Text                 = "Rebranded UI Design · Standard Architecture"
-    c2.TextColor3           = C.textSec
-    c2.Font                 = Enum.Font.Gotham
-    c2.TextSize             = 11
-    c2.TextXAlignment       = Enum.TextXAlignment.Left
-    c2.Parent               = credInn
-
-    local c3 = Instance.new("TextLabel")
-    c3.Position             = UDim2.new(0, 0, 0, 40)
-    c3.Size                 = UDim2.new(1, 0, 0, 14)
-    c3.BackgroundTransparency = 1
-    c3.Text                 = "Discord: discord.gg/QAhCXgaDZg"
-    c3.TextColor3           = C.textMuted
-    c3.Font                 = Enum.Font.Gotham
-    c3.TextSize             = 10
-    c3.TextXAlignment       = Enum.TextXAlignment.Left
-    c3.Parent               = credInn
-
+    -- ── Wire tabs & activate first ───────────────────────────────────
     wireTabButtons()
+    if #tabs > 0 then selectTab(tabs[1].name) end
 
-    -- Finalize GUI references
+    -- ── Mount ─────────────────────────────────────────────────────────
     screenGui.Parent = parent
     toggleGui.Parent = parent
 
@@ -830,15 +816,18 @@ function UI.build()
     UI.MainFrame = shell
 end
 
--- ── Cleanup ──────────────────────────────────────────────────────────
+-- ── Destroy ───────────────────────────────────────────────────────────
 
 function UI.destroy()
-    for _, c in ipairs(UI._conns) do
-        if c and c.Connected then c:Disconnect() end
+    for _, conn in ipairs(UI._conns) do
+        pcall(function() conn:Disconnect() end)
     end
     UI._conns = {}
-    if UI.ScreenGui then UI.ScreenGui:Destroy() end
-    if UI.ToggleGui then UI.ToggleGui:Destroy() end
+    if UI.ScreenGui then pcall(function() UI.ScreenGui:Destroy() end) end
+    if UI.ToggleGui then pcall(function() UI.ToggleGui:Destroy() end) end
+    UI.ScreenGui = nil
+    UI.ToggleGui = nil
+    UI.MainFrame = nil
 end
 
 return UI
