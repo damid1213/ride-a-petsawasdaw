@@ -64,7 +64,7 @@ local function resolveGuiParent()
     -- Last-resort: CoreGui is always accessible
     return game:GetService("CoreGui")
 end
-S.GuiParent   = resolveGuiParent()
+S.GuiParent  = resolveGuiParent()
 S.TargetParent = S.GuiParent  -- alias used by UI.lua
 
 -- ── queue_on_teleport helper ─────────────────────────────────────────
