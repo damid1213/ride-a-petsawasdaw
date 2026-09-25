@@ -1,10 +1,10 @@
 --[[
-    Vanguard — Plot.lua
+    LuxuryXHUB — Plot.lua
     Player base/plot detection and home deposit routines.
     Rewritten:
-        • findHomePlot() caches result — no workspace walk every 0.5s
-        • isOwner() refactored to a single helper, no duplicated logic
-        • Cache invalidated on CharacterAdded
+      • findHomePlot() caches result — no workspace walk every 0.5s
+      • isOwner() refactored to a single helper, no duplicated logic
+      • Cache invalidated on CharacterAdded
 ]]
 
 local NS          = getgenv().EggsESP
