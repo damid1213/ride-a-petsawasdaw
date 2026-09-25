@@ -7,7 +7,7 @@
       • Cleaner break/return guards
 ]]
 
-local NS          = getgenv().Vanguard or getgenv().EggsESP
+local NS          = getgenv().EggsESP
 local AppConfig   = NS.Config
 local S           = NS.Services
 local StateStore  = NS.StateStore
