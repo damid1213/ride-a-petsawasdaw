@@ -251,7 +251,7 @@ end
 -- UI.mount() — Full window with Vanguard logo
 -- ═══════════════════════════════════════════════════════════════════
 function UI.mount()
-    local LOGO_URL = "https://yourimageshare.com/ib/Slb28qCPst"
+    local LOGO_URL = "https://yourimageshare.com/ib/K3HDoXCNox.png"
 
     -- Resolve GUI parent defensively (S.TargetParent set by Services.lua)
     local guiParent = S.TargetParent or S.GuiParent
