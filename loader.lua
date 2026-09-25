@@ -18,7 +18,7 @@
 -- ── Configuration ────────────────────────────────────────────────────
 local CONFIG = {
     BASE_URL    = "https://raw.githubusercontent.com/damid1213/ride-a-petsawasdaw/main/src/",
-    VERSION_URL = "https://raw.githubusercontent.com/damid1213/ride-a-petsawasdaw/refs/heads/main/",
+    VERSION_URL = "https://raw.githubusercontent.com/damid1213/ride-a-petsawasdaw/main/version.txt",
     CACHE_DIR   = "Vanguard",
     NAMESPACE   = "EggsESP",
 
