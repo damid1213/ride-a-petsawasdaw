@@ -1,5 +1,5 @@
 --[[
-    LuxuryXHUB - Pull An Egg
+    Vanguard - Pull An Egg
     Config.lua - Centralized Configuration & Defaults
 ]]
 
