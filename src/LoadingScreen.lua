@@ -1,10 +1,9 @@
 -- src/LoadingScreen.lua
 -- Animated Loading Screen for RideAPet / Vanguard
 
-local NS = getgenv().Vanguard or getgenv().EggsESP or getgenv().LuxuryXHUB or {}
-getgenv().Vanguard = NS
+local NS = getgenv().EggsESP or getgenv().Vanguard or {}
 getgenv().EggsESP = NS
-getgenv().LuxuryXHUB = NS
+getgenv().Vanguard = NS
 local S = NS and NS.Services
 
 local LoadingScreen = {}
@@ -63,7 +62,7 @@ function LoadingScreen.Show()
     currentProgress = 0
     isComplete = false
 
-    -- Find parent
+    -- หา parent
     local targetParent
     if gethui then
         local ok, hui = pcall(gethui)
@@ -77,8 +76,8 @@ function LoadingScreen.Show()
         targetParent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
     end
 
-    -- Cleanup existing instances
-    local old = targetParent:FindFirstChild("Vanguard_Loading") or targetParent:FindFirstChild("LuxuryXHUB_Loading")
+    -- ลบของเก่า
+    local old = targetParent:FindFirstChild("Vanguard_Loading")
     if old then old:Destroy() end
 
     -- ═══ ScreenGui ═══
@@ -107,7 +106,7 @@ function LoadingScreen.Show()
     mainFrame.ZIndex = 1
     mainFrame.Parent = screenGui
 
-    -- Background Gradient Animation
+    -- Gradient (จะ animate ทีหลัง)
     local bgGradient = Instance.new("UIGradient")
     bgGradient.Color = ColorSequence.new({
         ColorSequenceKeypoint.new(0, Color3.fromRGB(10, 10, 15)),
@@ -149,7 +148,7 @@ function LoadingScreen.Show()
     logoContainer.ZIndex = 3
     logoContainer.Parent = content
 
-    -- ═══ Logo Glow ═══
+    -- ═══ Logo Glow (พื้นหลังเรืองแสง) ═══
     logoGlow = Instance.new("ImageLabel")
     logoGlow.Name = "LogoGlow"
     logoGlow.Size = UDim2.new(0, 180, 0, 180)
@@ -162,7 +161,7 @@ function LoadingScreen.Show()
     logoGlow.ZIndex = 2
     logoGlow.Parent = logoContainer
 
-    -- Animate glow transparency pulse
+    -- Animate glow (pulse)
     task.spawn(function()
         local dir = 1
         while screenGui and screenGui.Parent and logoGlow and logoGlow.Parent and not isComplete do
@@ -174,7 +173,7 @@ function LoadingScreen.Show()
         end
     end)
 
-    -- Animate glow scale pulse
+    -- Animate glow scale (pulse)
     task.spawn(function()
         while screenGui and screenGui.Parent and logoGlow and logoGlow.Parent and not isComplete do
             tween(logoGlow, { Size = UDim2.new(0, 200, 0, 200) }, 1.0):Play()
@@ -184,7 +183,7 @@ function LoadingScreen.Show()
         end
     end)
 
-    -- ═══ Ring ═══
+    -- ═══ Ring (วงกลมหมุนรอบโลโก้) ═══
     logoRing = Instance.new("Frame")
     logoRing.Name = "Ring"
     logoRing.Size = UDim2.new(0, 150, 0, 150)
@@ -204,6 +203,7 @@ function LoadingScreen.Show()
     ringStroke.Transparency = 0.4
     ringStroke.Parent = logoRing
 
+    -- Gradient บน ring (ทำให้ดูเหมือนหมุน)
     local ringGradient = Instance.new("UIGradient")
     ringGradient.Color = ColorSequence.new({
         ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 230, 118)),
@@ -212,7 +212,7 @@ function LoadingScreen.Show()
     })
     ringGradient.Parent = ringStroke
 
-    -- Animate ring rotation
+    -- Animate ring หมุน
     task.spawn(function()
         local rotate = 0
         while screenGui and screenGui.Parent and ringGradient and ringGradient.Parent and not isComplete do
@@ -222,7 +222,7 @@ function LoadingScreen.Show()
         end
     end)
 
-    -- Animate ring pulse
+    -- Animate ring breathe (ขยาย/หด)
     task.spawn(function()
         while screenGui and screenGui.Parent and logoRing and logoRing.Parent and not isComplete do
             tween(logoRing, { Size = UDim2.new(0, 160, 0, 160), Position = UDim2.new(0.5, -80, 0.5, -80) }, 0.8):Play()
@@ -232,7 +232,7 @@ function LoadingScreen.Show()
         end
     end)
 
-    -- ═══ Particle Effect ═══
+    -- ═══ Particle Effect (จุดเล็ก ๆ รอบโลโก้) ═══
     particleContainer = Instance.new("Frame")
     particleContainer.Name = "Particles"
     particleContainer.Size = UDim2.new(0, 220, 0, 220)
@@ -241,7 +241,9 @@ function LoadingScreen.Show()
     particleContainer.ZIndex = 1
     particleContainer.Parent = logoContainer
 
+    -- สร้าง particles 12 ตัว
     for i = 1, 12 do
+        local angle = (i / 12) * math.pi * 2
         local particle = Instance.new("Frame")
         particle.Name = "Particle" .. i
         particle.Size = UDim2.new(0, 6, 0, 6)
@@ -254,11 +256,13 @@ function LoadingScreen.Show()
         pc.Parent = particle
 
         particle.Parent = particleContainer
+
+        -- เก็บ reference
         particle:SetAttribute("Angle", i / 12)
         particle:SetAttribute("Radius", 100)
     end
 
-    -- Animate orbital particles
+    -- Animate particles หมุนรอบ
     task.spawn(function()
         local rotation = 0
         while screenGui and screenGui.Parent and particleContainer and particleContainer.Parent and not isComplete do
@@ -289,7 +293,7 @@ function LoadingScreen.Show()
     logoImage.ImageTransparency = 1
     logoImage.Parent = logoContainer
 
-    -- Logo entry animation
+    -- Animation: Logo fade + bounce in
     logoImage.Size = UDim2.new(0, 60, 0, 60)
     logoImage.Position = UDim2.new(0.5, -30, 0.5, -30)
     tween(logoImage, { ImageTransparency = 0 }, 0.5):Play()
@@ -298,7 +302,7 @@ function LoadingScreen.Show()
         Position = UDim2.new(0.5, -60, 0.5, -60),
     }, 0.8, Enum.EasingStyle.Back, Enum.EasingDirection.Out):Play()
 
-    -- Logo subtle bounce
+    -- Animation: Logo pulse (เต้นเบา ๆ)
     task.spawn(function()
         task.wait(1.0)
         while screenGui and screenGui.Parent and logoImage and logoImage.Parent and not isComplete do
@@ -315,7 +319,7 @@ function LoadingScreen.Show()
     title.Size = UDim2.new(1, 0, 0, 32)
     title.Position = UDim2.new(0, 0, 0, 170)
     title.BackgroundTransparency = 1
-    title.Text = "Vanguard<font color='#00e676'>X</font>HUB"
+    title.Text = "Luxury<font color='#00e676'>X</font>HUB"
     title.RichText = true
     title.TextColor3 = Color3.fromRGB(255, 255, 255)
     title.TextSize = 30
@@ -374,7 +378,7 @@ function LoadingScreen.Show()
     pbCorner.CornerRadius = UDim.new(1, 0)
     pbCorner.Parent = progressBar
 
-    -- Shimmer Effect
+    -- Shimmer effect on progress bar
     shimmer = Instance.new("Frame")
     shimmer.Name = "Shimmer"
     shimmer.Size = UDim2.new(0, 60, 1, 0)
@@ -397,7 +401,7 @@ function LoadingScreen.Show()
     })
     shimmerGradient.Parent = shimmer
 
-    -- Animate shimmer loop
+    -- Animate shimmer
     task.spawn(function()
         while screenGui and screenGui.Parent and shimmer and shimmer.Parent and not isComplete do
             shimmer.Position = UDim2.new(-1, 0, 0, 0)
@@ -452,7 +456,7 @@ function LoadingScreen.Show()
         tween(statusText, { TextTransparency = 0 }, 0.4):Play()
     end)
 
-    -- Spinner Dots
+    -- Spinner dots (3 dots กระพริบ)
     for i = 1, 3 do
         local dot = Instance.new("Frame")
         dot.Name = "Dot" .. i
@@ -471,11 +475,11 @@ function LoadingScreen.Show()
         table.insert(spinnerDots, dot)
     end
 
-    -- Animate dots pulse
+    -- Animate dots
     task.spawn(function()
         task.wait(0.5)
         while screenGui and screenGui.Parent and not isComplete do
-            for _, dot in ipairs(spinnerDots) do
+            for i, dot in ipairs(spinnerDots) do
                 if dot and dot.Parent then
                     tween(dot, { BackgroundTransparency = 0 }, 0.2):Play()
                     task.wait(0.15)
@@ -535,11 +539,12 @@ function LoadingScreen.Update(progress, status, moduleName)
     progress = math.clamp(progress or currentProgress, 0, 100)
     currentProgress = progress
 
-    -- Animate progress bar fill
+    -- Animate progress bar
     tween(progressBar, { Size = UDim2.new(progress / 100, 0, 1, 0) }, 0.3):Play()
 
     if progressText then
         progressText.Text = string.format("%d%%", math.floor(progress))
+        -- Pop animation
         progressText.TextSize = 18
         tween(progressText, { TextSize = 15 }, 0.2):Play()
     end
@@ -571,7 +576,7 @@ function LoadingScreen.Complete()
 
     task.wait(0.3)
 
-    -- Fade out all components
+    -- Fade out everything
     local ts = game:GetService("TweenService")
     local fadeTween = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
 
@@ -591,8 +596,8 @@ function LoadingScreen.Complete()
         end
     end
 
-    -- Fade out blur effect
-    local blur = game:GetService("Lighting"):FindFirstChild("Vanguard_Blur") or game:GetService("Lighting"):FindFirstChild("LuxuryXHUB_Blur")
+    -- Fade out blur
+    local blur = game:GetService("Lighting"):FindFirstChild("Vanguard_Blur")
     if blur then
         ts:Create(blur, fadeTween, { Size = 0 }):Play()
     end
@@ -610,7 +615,7 @@ end
 -- ══════════════════════════════════════════════════════════
 function LoadingScreen.Hide()
     disconnectAll()
-    local blur = game:GetService("Lighting"):FindFirstChild("Vanguard_Blur") or game:GetService("Lighting"):FindFirstChild("LuxuryXHUB_Blur")
+    local blur = game:GetService("Lighting"):FindFirstChild("Vanguard_Blur")
     if blur then blur:Destroy() end
     if screenGui then
         pcall(function() screenGui:Destroy() end)
